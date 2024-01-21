@@ -38,7 +38,38 @@
        entete entete;
    }TOV;
 
+        // Fonction pour obtenir la i-ème caractéristique de l'en-tête ientete(f,i)
 
+int ientete(TOV *f, int i) { // tov *f int i
+
+    // Retourne la i-ème caractéristique en fonction de la valeur de i
+    switch (i) {
+        case 1:
+            return (f->entete).indice_der_bloc;
+        case 2:
+            return (f->entete).totalblocs;
+         case 3:
+             return (f->entete).totaleng;
+        // Ajoutez d'autres cas pour d'autres caractéristiques
+        default:
+            fprintf(stderr, "Caractéristique non prise en charge\n");
+            return -1;  // Valeur par défaut pour caractéristique non prise en charge
+    }}
+
+
+           // mettre a jour l'entete affentete
+
+        int AffEntete(TOV *f, int i, int val) {
+             // si indice i = 1er cara alors on modifier la premiere cara
+            if (i==1)
+               return(f->entete).indice_der_bloc=val;
+            //si indice i = 2eme cara alors on modifier la 2eme cara
+            else if (i==2)
+               return(f->entete).totalblocs=val;
+            else if (i==3)
+                return (f->entete).totaleng=val;
+
+         }
 
 
 
