@@ -22,7 +22,9 @@
 
  //declaration buffer
 
-   typedef struct TypeBloc buffer;
+typedef struct Buffer {
+    TypeBloc bloc;
+} Buffer;
 
   // declaration entete n3amroha dans main entete au debut de fichier
   typedef struct entete{
@@ -70,60 +72,27 @@ int ientete(TOV *f, int i) { // tov *f int i
                 return (f->entete).totaleng=val;
 
          }
+         // Lecture du bloc i dans le tampon (buf)
+void lireDir(TOV *fichier, int i, Buffer *buf) {
+    // Vérifie si i est dans les limites du fichier
+    if (i <= ientete(fichier, 1)) {
+        // Positionne le curseur au début du bloc i
+        fseek(fichier->f, sizeof(entete) + ((i - 1) * sizeof(TypeBloc)), SEEK_SET);
+        // Lit le bloc dans le tampon (buf)
+        fread(&(buf->bloc), sizeof(TypeBloc), 1, fichier->f);
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Écriture du tampon (buf) dans le bloc i
+void EcrireDir(TOV *fichier, int i, Buffer buf) {
+    // Vérifie si i est dans les limites du fichier
+    if (i <= ientete(fichier, 1)) {
+        // Positionne le curseur au début du bloc i
+        fseek(fichier->f, sizeof(entete) + (sizeof(TypeBloc) * (i - 1)), SEEK_SET);
+        // Écrit le tampon dans le fichier
+        fwrite(&(buf.bloc), sizeof(TypeBloc), 1, fichier->f);
+    }
+}
  //fct creation un fichier
        TOV *ouvrir(char *nomfich,char mod)  // mod = 'A' ancien (r+)
 {
