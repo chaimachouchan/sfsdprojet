@@ -215,3 +215,69 @@ void inserer(typeEng e, TOV *fichier) {
         AffEntete(fichier, 2, ientete(fichier, 2) + 1);
     }
 }
+
+//recherche dichotomique de la cle
+ void recherche_dicho( TOV* fichier,int c,bool *trouv,int *i,int *j){
+
+    struct TypeBloc buf ;
+    bool stop;
+    entete entete;
+    int bi,bs,inf,sup,k; // pour parcourir les eng apres on donne val de k win l9ina la cle l j
+
+    bs = ientete(fichier,1);  // la borne sup (le num du dernier bloc de f)
+    bi = 1;  // la borne inf (le num du premier bloc de f)
+
+    trouv=false;
+    stop=false;
+    k=1;
+    //recherche dichotomique entre blocs
+    while((bi<=bs) && (!trouv)&&(!stop)){
+        i=(bi + bs)/2;
+        lireDir(fichier,i,&buf);
+
+        //recherche dichotomique dans le bloc
+        if((c>=buf.tab[1].cle) && (c <= buf.tab[buf.nb].cle)){
+            inf = 1;
+            sup = buf.nb;
+            while((inf<=sup) && (!trouv)){
+                k = (inf + sup)/2 ;
+
+                if( c == buf.tab[k].cle){
+                    trouv=true;
+                    j=k;
+                }else{
+                    if(c < buf.tab[k].cle){
+                       sup=k--;;
+                       }else{
+                        inf=k++;
+                       }
+                }
+            }
+            if(inf>sup){
+                k=inf;
+            }
+
+            stop=true;
+
+        }
+        else{
+                if(c < buf.tab[1].cle){
+                    bs=i--;
+                }else{
+                    bi=i++;
+                }
+        }
+    }
+
+    if(bi>bs){
+        i=bi;
+        k=1;
+        j=k;
+    }
+
+
+    fclose(fichier);
+}
+
+
+
