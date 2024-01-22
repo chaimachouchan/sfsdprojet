@@ -160,3 +160,58 @@ void fermer(TOV *fichier)
       }
       fclose(fichier);
    }
+// Insere un enregistrement dans le fichier TOV
+void inserer(typeEng e, TOV *fichier) {
+    TypeBloc buffer;
+    bool trouv;
+    bool continuer;
+    int i, j, k;
+
+    // Recherche dichotomique pour trouver l'emplacement d'insertion
+    recherche_dicho(fichier, e.cle, &trouv, &i, &j);
+
+    if (!trouv) {
+        continuer = true;
+
+        // Parcourt les blocs et effectue l'insertion au bon endroit
+        while (continuer && (i <= ientete(fichier, 1))) {
+            lireDir(fichier, i, &buffer);
+            typeEng x = buffer.tab[buffer.nb];
+            k = buffer.nb;
+
+            // Decalage des enregistrements pour faire de la place
+            while (k > j) {
+                buffer.tab[k] = buffer.tab[k - 1];
+                k = k - 1;
+            }
+
+            // Insertion de l'enregistrement
+            buffer.tab[j] = e;
+
+            // Si le bloc n'est pas plein, termine l'insertion
+            if (buffer.nb < 10) {
+                buffer.nb = buffer.nb + 1;
+                buffer.tab[buffer.nb] = x;
+                EcrireDir(fichier, i, buffer);
+                continuer = false;
+            } else {
+                // Sinon, écrit le bloc, passe au bloc suivant, et réinitialise les indices
+                EcrireDir(fichier, i, buffer);
+                i = i + 1;
+                j = 1;
+                e = x;
+            }
+        }
+
+        // Si l'insertion se fait au-dela des blocs existants, cree un nouveau bloc
+        if (i > ientete(fichier, 1)) {
+            buffer.tab[1] = e;
+            buffer.nb = 1;
+            EcrireDir(fichier, i, buffer);
+            AffEntete(fichier, 1, i); // Mise a jour l'indice du dernier bloc
+        }
+
+        // Mise a jour le nombre total d'enregistrements
+        AffEntete(fichier, 2, ientete(fichier, 2) + 1);
+    }
+}
