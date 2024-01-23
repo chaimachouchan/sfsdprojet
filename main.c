@@ -280,6 +280,44 @@ void inserer(typeEng e, TOV *fichier) {
       fclose(fichier);
    }
 
+  int main()
+    {
 
+    int k,nbr;
+    TypeBloc buf;
+    TOV *fichier;
+    int i, j, cle;
+    bool trouv;
+    char nomfich[30];
+    typeEng e;
+    char *nom = NULL;
+    char *prenom = NULL;
+    char Char;
+    int tailleNom = 0;
+    int taillePrenom = 0;
+    entete mon_entete;
+    int choix, choix1;
 
+    manipulation_fichier :
+      printf("\n\n [1] : Insertion.\n");
+      printf(" [2] : Recherche.\n");
+      printf(" [3] : Suppression.\n");
+      printf(" [0] : menu principal.\n");
+
+      printf("\n\n Votre choix : ");
+      scanf("%d",&choix1);
+
+       switch(choix1){
+
+          case 3 : // suppression logique
+        {
+          printf("\n  SUPPRESSION:\n\n");
+          printf(" Donnez la cle a supprimer: ");
+          scanf("%d",&cle);
+          supression(cle , fichier);
+          printf("la cle a ete supprimee! \n");
+          goto manipulation_fichier;
+        }
+       }
+    }
 
