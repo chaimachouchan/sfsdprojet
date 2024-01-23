@@ -128,94 +128,6 @@ void fermer(TOV *fichier)
     fclose(fichier->f);
 
 }
-
-
-       //supression d un enregistrement de cle c
-  void supression(int c , TOV *fichier){
-     int i,j ;// i:indice de tableau de bloc j: indice d'eng dans un tab d'eng dans un bloc
-     int k ; // pour faire decalage de tab d'eng
-     char type[20] ;// type de supression
-     bool trouv;
-     TypeBloc buf ;
-     const char lo[20]= "logique";
-     const char ph[20]= "physique" ;
-     recherche_dicho(fichier,c,&trouv,&i,&j); //cherche a cle c
-      if(trouv == true){
-        printf("vous voullez la supression physique ou logique? ");
-        scanf("%s", type);//choisi si physique ou logique
-        //strcmp pour compare 2 chaine de caractere type et lo ou ph si return 0 alors sont identique
-         if(strcmp(type,lo) == 0){
-
-            buf.tab[j].supp = true;
-            EcrireDir(fichier,i,buf);
-         }else if(strcmp(type,ph) == 0){
-
-                for (k=j ; k<buf.nb ; k++){
-
-                    buf.tab[k]=buf.tab[k+1]; //decalage apartir d enrg qui veut suprimer
-                }
-                buf.nb-- ; //pour suprime derniere case
-                EcrireDir(fichier,i,buf);
-              }
-      }
-      fclose(fichier);
-   }
-// Insere un enregistrement dans le fichier TOV
-void inserer(typeEng e, TOV *fichier) {
-    TypeBloc buffer;
-    bool trouv;
-    bool continuer;
-    int i, j, k;
-
-    // Recherche dichotomique pour trouver l'emplacement d'insertion
-    recherche_dicho(fichier, e.cle, &trouv, &i, &j);
-
-    if (!trouv) {
-        continuer = true;
-
-        // Parcourt les blocs et effectue l'insertion au bon endroit
-        while (continuer && (i <= ientete(fichier, 1))) {
-            lireDir(fichier, i, &buffer);
-            typeEng x = buffer.tab[buffer.nb];
-            k = buffer.nb;
-
-            // Decalage des enregistrements pour faire de la place
-            while (k > j) {
-                buffer.tab[k] = buffer.tab[k - 1];
-                k = k - 1;
-            }
-
-            // Insertion de l'enregistrement
-            buffer.tab[j] = e;
-
-            // Si le bloc n'est pas plein, termine l'insertion
-            if (buffer.nb < 10) {
-                buffer.nb = buffer.nb + 1;
-                buffer.tab[buffer.nb] = x;
-                EcrireDir(fichier, i, buffer);
-                continuer = false;
-            } else {
-                // Sinon, écrit le bloc, passe au bloc suivant, et réinitialise les indices
-                EcrireDir(fichier, i, buffer);
-                i = i + 1;
-                j = 1;
-                e = x;
-            }
-        }
-
-        // Si l'insertion se fait au-dela des blocs existants, cree un nouveau bloc
-        if (i > ientete(fichier, 1)) {
-            buffer.tab[1] = e;
-            buffer.nb = 1;
-            EcrireDir(fichier, i, buffer);
-            AffEntete(fichier, 1, i); // Mise a jour l'indice du dernier bloc
-        }
-
-        // Mise a jour le nombre total d'enregistrements
-        AffEntete(fichier, 2, ientete(fichier, 2) + 1);
-    }
-}
-
 //recherche dichotomique de la cle
  void recherche_dicho( TOV* fichier,int c,bool *trouv,int *i,int *j){
 
@@ -278,6 +190,95 @@ void inserer(typeEng e, TOV *fichier) {
 
     fclose(fichier);
 }
+ // Insere un enregistrement dans le fichier TOV
+void inserer(typeEng e, TOV *fichier) {
+    TypeBloc buffer;
+    bool trouv;
+    bool continuer;
+    int i, j, k;
+
+    // Recherche dichotomique pour trouver l'emplacement d'insertion
+    recherche_dicho(fichier, e.cle, &trouv, &i, &j);
+
+    if (!trouv) {
+        continuer = true;
+
+        // Parcourt les blocs et effectue l'insertion au bon endroit
+        while (continuer && (i <= ientete(fichier, 1))) {
+            lireDir(fichier, i, &buffer);
+            typeEng x = buffer.tab[buffer.nb];
+            k = buffer.nb;
+
+            // Decalage des enregistrements pour faire de la place
+            while (k > j) {
+                buffer.tab[k] = buffer.tab[k - 1];
+                k = k - 1;
+            }
+
+            // Insertion de l'enregistrement
+            buffer.tab[j] = e;
+
+            // Si le bloc n'est pas plein, termine l'insertion
+            if (buffer.nb < 10) {
+                buffer.nb = buffer.nb + 1;
+                buffer.tab[buffer.nb] = x;
+                EcrireDir(fichier, i, buffer);
+                continuer = false;
+            } else {
+                // Sinon, écrit le bloc, passe au bloc suivant, et réinitialise les indices
+                EcrireDir(fichier, i, buffer);
+                i = i + 1;
+                j = 1;
+                e = x;
+            }
+        }
+
+        // Si l'insertion se fait au-dela des blocs existants, cree un nouveau bloc
+        if (i > ientete(fichier, 1)) {
+            buffer.tab[1] = e;
+            buffer.nb = 1;
+            EcrireDir(fichier, i, buffer);
+            AffEntete(fichier, 1, i); // Mise a jour l'indice du dernier bloc
+        }
+
+        // Mise a jour le nombre total d'enregistrements
+        AffEntete(fichier, 2, ientete(fichier, 2) + 1);
+    }
+}
+
+
+
+       //supression d un enregistrement de cle c
+  void supression(int c , TOV *fichier){
+     int i,j ;// i:indice de tableau de bloc j: indice d'eng dans un tab d'eng dans un bloc
+     int k ; // pour faire decalage de tab d'eng
+     char type[20] ;// type de supression
+     bool trouv;
+     TypeBloc buf ;
+     const char lo[20]= "logique";
+     const char ph[20]= "physique" ;
+     recherche_dicho(fichier,c,&trouv,&i,&j); //cherche a cle c
+      if(trouv == true){
+        printf("vous voullez la supression physique ou logique? ");
+        scanf("%s", type);//choisi si physique ou logique
+        //strcmp pour compare 2 chaine de caractere type et lo ou ph si return 0 alors sont identique
+         if(strcmp(type,lo) == 0){
+
+            buf.tab[j].supp = true;
+            EcrireDir(fichier,i,buf);
+         }else if(strcmp(type,ph) == 0){
+
+                for (k=j ; k<buf.nb ; k++){
+
+                    buf.tab[k]=buf.tab[k+1]; //decalage apartir d enrg qui veut suprimer
+                }
+                buf.nb-- ; //pour suprime derniere case
+             
+              }
+      }
+      fclose(fichier);
+   }
+
 
 
 
