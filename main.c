@@ -298,6 +298,28 @@ void inserer(typeEng e, TOV *fichier) {
     entete mon_entete;
     int choix, choix1;
 
+menuprincipal :
+  printf("\n  LE MENU PRINCIPAL \n\n\n");
+  printf(" [1] : creation d'un fichier;\n");
+  printf(" [2] : ouverture d'un fichier existant;\n");
+  printf(" [0] : quitter programme;\n");
+  printf("\n\n Votre choix :\n ");
+
+  scanf("%d",&choix);
+  switch(choix)
+    {
+    case 0 : // fin programme ;
+    {
+      goto end;
+    }
+    case 1 : // nouveau fichier
+    {
+
+      printf("\n  CREATION FICHIER :\n");
+      printf(" Veuillez donner le nom de votre fichier : ");
+      scanf("%s",nomfich);
+      fichier = ouvrir(nomfich,'N');
+      
     manipulation_fichier :
       printf("\n\n [1] : Insertion.\n");
       printf(" [2] : Recherche.\n");
@@ -320,4 +342,5 @@ void inserer(typeEng e, TOV *fichier) {
         }
        }
     }
-
+    end : return 0;
+    }
