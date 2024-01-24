@@ -277,6 +277,7 @@ void inserer(typeEng e, TOV *fichier) {
              
               }
       }
+        AffEntete(fichier, 2, ientete(fichier, 2) - 1);
       fclose(fichier);
    }
 
@@ -297,7 +298,7 @@ void inserer(typeEng e, TOV *fichier) {
     int taillePrenom = 0;
     entete mon_entete;
     int choix, choix1;
-    mon_entete.indice_der_bloc=5;
+    mon_entete.indice_der_bloc=4;
     mon_entete.totalblocs=5;
     mon_entete.totaleng=50;
 
@@ -432,6 +433,22 @@ menuprincipal :
           goto manipulation_fichier;
         }
        }
+
     }
+    case 2 : // ancien fichier
+    {
+      printf("\n  OUVERTURE FICHIER :\n");
+      printf(" Veuillez donner le nom de votre fichier : ");
+      scanf("%s",nomfich);
+      fichier = ouvrir(nomfich,'A');
+      if(fichier->f==NULL){
+          printf("ce fichier n'existe pas! \n");
+          fermer(fichier);
+          goto menuprincipal;
+      }else{
+      goto manipulation_fichier;
+      }
+
     end : return 0;
-    }}
+    } 
+ }
