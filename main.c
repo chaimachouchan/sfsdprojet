@@ -72,7 +72,7 @@ int ientete(TOV *f, int i) { // tov *f int i
 
          }
          // Lecture du bloc i dans le tampon (buf)
-void lireDir(TOV *fichier, int i, buffer *buf) {
+void lireDir(TOV *fichier, int i, buffer buf) {
     // Vérifie si i est dans les limites du fichier
     if (i <= ientete(fichier, 1)) {
         // Positionne le curseur au début du bloc i
@@ -146,7 +146,7 @@ void fermer(TOV *fichier)
     //recherche dichotomique entre blocs
     while((bi<=bs) && (!trouv)&&(!stop)){
         i=(bi + bs)/2;
-        lireDir(fichier,i,&buf);
+        lireDir(fichier,i,buf);
 
         //recherche dichotomique dans le bloc
         if((c>=buf.tab[1].cle) && (c <= buf.tab[buf.nb].cle)){
@@ -197,36 +197,29 @@ void inserer(typeEng e, TOV *fichier) {
     bool trouv;
     bool continuer;
     int i, j, k;
-
-    // Recherche dichotomique pour trouver l'emplacement d'insertion
+    buffer.nb =1;
     recherche_dicho(fichier, e.cle, &trouv, &i, &j);
 
     if (!trouv) {
         continuer = true;
 
-        // Parcourt les blocs et effectue l'insertion au bon endroit
-        while (continuer && (i <= ientete(fichier, 1))) {
-            lireDir(fichier, i, &buffer);
-            typeEng x = buffer.tab[buffer.nb];
-            k = buffer.nb;
+        while ((continuer) && (i <= ientete(fichier, 1))) {
+            lireDir(fichier, i, buffer);
+            typeEng x = buffer.tab[buffer.nb - 1];
+            k = buffer.nb - 1;
 
-            // Decalage des enregistrements pour faire de la place
-            while (k > j) {
+            while (k >= j) {
                 buffer.tab[k] = buffer.tab[k - 1];
                 k = k - 1;
             }
 
-            // Insertion de l'enregistrement
-            buffer.tab[j] = e;
+            buffer.tab[j - 1] = e;
+            buffer.nb = buffer.nb + 1;
 
-            // Si le bloc n'est pas plein, termine l'insertion
-            if (buffer.nb < 10) {
-                buffer.nb = buffer.nb + 1;
-                buffer.tab[buffer.nb] = x;
+            if (buffer.nb <= 10) {
                 EcrireDir(fichier, i, buffer);
                 continuer = false;
             } else {
-                // Sinon, écrit le bloc, passe au bloc suivant, et réinitialise les indices
                 EcrireDir(fichier, i, buffer);
                 i = i + 1;
                 j = 1;
@@ -234,19 +227,47 @@ void inserer(typeEng e, TOV *fichier) {
             }
         }
 
-        // Si l'insertion se fait au-dela des blocs existants, cree un nouveau bloc
         if (i > ientete(fichier, 1)) {
-            buffer.tab[1] = e;
+            buffer.tab[0] = e;
             buffer.nb = 1;
             EcrireDir(fichier, i, buffer);
-            AffEntete(fichier, 1, i); // Mise a jour l'indice du dernier bloc
+            AffEntete(fichier, 1, i);
         }
 
-        // Mise a jour le nombre total d'enregistrements
         AffEntete(fichier, 2, ientete(fichier, 2) + 1);
+
     }
 }
 
+
+// Suppression d'un enregistrement de clé c
+void supression(int c, TOV *fichier) {
+    int i, j; // i: indice de tableau de bloc, j: indice d'eng dans un tab d'eng dans un bloc
+    bool trouv;
+    TypeBloc buf;
+    const char lo[20] = "logique";
+    const char ph[20] = "physique";
+    recherche_dicho(fichier, c, &trouv, &i, &j);
+
+    if (trouv) {
+        printf("Vous voulez la suppression physique ou logique? ");
+        char type[20];
+        scanf("%s", type);
+
+        if (strcmp(type, lo) == 0) {
+            buf.tab[j - 1].supp = true;
+            EcrireDir(fichier, i, buf);
+        } else if (strcmp(type, ph) == 0) {
+            for (int k = j - 1; k < buf.nb - 1; k++) {
+                buf.tab[k] = buf.tab[k + 1];
+            }
+            buf.nb--;
+            EcrireDir(fichier, i, buf);
+        }
+    }
+
+    AffEntete(fichier, 2, ientete(fichier, 2) - 1);
+}
 
 
        //supression d un enregistrement de cle c
