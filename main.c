@@ -330,7 +330,77 @@ menuprincipal :
       scanf("%d",&choix1);
 
        switch(choix1){
+           case 0 : // retour au menu principal
+        {
+          fermer(fichier);
+          goto menuprincipal;
+        }
+        case 1 : // insertion
+        {
+          int k ;
+          printf("\n  INSERTION :\n");
+          printf("Combien d'enregistrements voulez-vous entrer ? : ");
+          scanf("%d", &k);
+          getchar();// consume newline
 
+    for (int i = 1; i <= k; i++) {
+        // Nom
+        printf("Veuillez entrer un nom [appuyer Entrer pour terminer] : ");
+        while (1) {
+            Char = getchar();
+            if (Char == '\n') {
+                break;
+            }
+            char *temp_nom = (char *)realloc(nom, (tailleNom + 1) * sizeof(char));
+            if (temp_nom == NULL) {
+                // Handle memory allocation failure
+                printf("Memory allocation failed for nom\n");
+                free(nom);
+                free(prenom);
+                return 1;
+            }
+            nom = temp_nom;
+            nom[tailleNom] = Char;
+            tailleNom++;
+        }
+        nom = (char *)realloc(nom, (tailleNom + 1) * sizeof(char));
+        nom[tailleNom] = '\0';
+        e.nom = nom;
+
+        // Prenom
+        printf("Veuillez entrer un prenom [appuyer Entrer pour terminer] : ");
+        while (1) {
+            Char = getchar();
+            if (Char == '\n') {
+                break;
+            }
+            char *temp_prenom = (char *)realloc(prenom, (taillePrenom + 1) * sizeof(char));
+            if (temp_prenom == NULL) {
+                // Handle memory allocation failure
+                printf("Memory allocation failed for prenom\n");
+                free(nom);
+                free(prenom);
+                return 1;
+            }
+            prenom = temp_prenom;
+            prenom[taillePrenom] = Char;
+            taillePrenom++;
+        }
+        prenom = (char *)realloc(prenom, (taillePrenom + 1) * sizeof(char));
+        prenom[taillePrenom] = '\0';
+        //e.prenom = prenom;
+
+        // Cle
+        printf("Veuillez entrer la cle : ");
+        scanf("%d", &cle);
+        e.cle = cle;
+
+        inserer(e, fichier);
+        getchar();
+         }
+
+          goto manipulation_fichier;
+        }
           case 3 : // suppression logique
         {
           printf("\n  SUPPRESSION:\n\n");
