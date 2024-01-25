@@ -240,34 +240,7 @@ void inserer(typeEng e, TOV *fichier) {
 }
 
 
-// Suppression d'un enregistrement de clé c
-void supression(int c, TOV *fichier) {
-    int i, j; // i: indice de tableau de bloc, j: indice d'eng dans un tab d'eng dans un bloc
-    bool trouv;
-    TypeBloc buf;
-    const char lo[20] = "logique";
-    const char ph[20] = "physique";
-    recherche_dicho(fichier, c, &trouv, &i, &j);
-
-    if (trouv) {
-        printf("Vous voulez la suppression physique ou logique? ");
-        char type[20];
-        scanf("%s", type);
-
-        if (strcmp(type, lo) == 0) {
-            buf.tab[j - 1].supp = true;
-            EcrireDir(fichier, i, buf);
-        } else if (strcmp(type, ph) == 0) {
-            for (int k = j - 1; k < buf.nb - 1; k++) {
-                buf.tab[k] = buf.tab[k + 1];
-            }
-            buf.nb--;
-            EcrireDir(fichier, i, buf);
-        }
-    }
-
-    AffEntete(fichier, 2, ientete(fichier, 2) - 1);
-}
+/**/
 
 
        //supression d un enregistrement de cle c
