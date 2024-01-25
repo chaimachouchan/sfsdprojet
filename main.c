@@ -95,6 +95,8 @@ void EcrireDir(TOV *fichier, int i, buffer buf) {
  //fct creation un fichier
        TOV *ouvrir(char *nomfich,char mod)  // mod = 'A' ancien (r+)
 {
+    
+    entete mon_entete;
     TOV *fichier=malloc(sizeof(TOV)) ;
     char s[3];
     if ((mod == 'A') || (mod =='a')) {
@@ -111,9 +113,9 @@ void EcrireDir(TOV *fichier, int i, buffer buf) {
     }
     else
     {
-        (fichier->entete).indice_der_bloc=0;
-        (fichier->entete).totalblocs=0;
-        (fichier->entete).totaleng=0;
+        mon_entete.indice_der_bloc=4;
+        mon_entete.totalblocs=5;
+        mon_entete.totaleng=50;
         fwrite(&(fichier->entete),sizeof(entete),1,fichier->f);
     }
     return fichier;
@@ -140,24 +142,24 @@ void fermer(TOV *fichier)
     bs = ientete(fichier,1);  // la borne sup (le num du dernier bloc de f)
     bi = 1;  // la borne inf (le num du premier bloc de f)
 
-    trouv=false;
+    *trouv=false;
     stop=false;
     k=1;
     //recherche dichotomique entre blocs
-    while((bi<=bs) && (!trouv)&&(!stop)){
-        i=(bi + bs)/2;
+    while((bi<=bs) && (!*trouv)&&(!stop)){
+        *i=(bi + bs)/2;
         lireDir(fichier,i,buf);
 
         //recherche dichotomique dans le bloc
         if((c>=buf.tab[1].cle) && (c <= buf.tab[buf.nb].cle)){
             inf = 1;
             sup = buf.nb;
-            while((inf<=sup) && (!trouv)){
+            while((inf<=sup) && (!*trouv)){
                 k = (inf + sup)/2 ;
 
                 if( c == buf.tab[k].cle){
-                    trouv=true;
-                    j=k;
+                    *trouv=true;
+                    *j=k;
                 }else{
                     if(c < buf.tab[k].cle){
                        sup=k--;;
@@ -175,21 +177,20 @@ void fermer(TOV *fichier)
         }
         else{
                 if(c < buf.tab[1].cle){
-                    bs=i--;
+                    bs=*i--;
                 }else{
-                    bi=i++;
+                    bi=*i++;
                 }
         }
     }
 
     if(bi>bs){
-        i=bi;
+        *i=bi;
         k=1;
-        j=k;
+        *j=k;
     }
 
 
-    fclose(fichier);
 }
  // Insere un enregistrement dans le fichier TOV
 void inserer(typeEng e, TOV *fichier) {
@@ -197,29 +198,37 @@ void inserer(typeEng e, TOV *fichier) {
     bool trouv;
     bool continuer;
     int i, j, k;
-    buffer.nb =1;
+    buffer.nb = 1;
+
+    // Recherche dichotomique pour trouver l'emplacement d'insertion
     recherche_dicho(fichier, e.cle, &trouv, &i, &j);
 
     if (!trouv) {
         continuer = true;
 
-        while ((continuer) && (i <= ientete(fichier, 1))) {
+        // Parcourt les blocs et effectue l'insertion au bon endroit
+        while (continuer && (i <= ientete(fichier, 1))) {
             lireDir(fichier, i, buffer);
-            typeEng x = buffer.tab[buffer.nb - 1];
-            k = buffer.nb - 1;
+            typeEng x = buffer.tab[buffer.nb];
+            k = buffer.nb;
 
-            while (k >= j) {
+            // Decalage des enregistrements pour faire de la place
+            while (k > j) {
                 buffer.tab[k] = buffer.tab[k - 1];
                 k = k - 1;
             }
 
-            buffer.tab[j - 1] = e;
-            buffer.nb = buffer.nb + 1;
+            // Insertion de l'enregistrement
+            buffer.tab[j] = e;
 
-            if (buffer.nb <= 10) {
+            // Si le bloc n'est pas plein, termine l'insertion
+            if (buffer.nb < 10) {
+                buffer.nb = buffer.nb + 1;
+                buffer.tab[buffer.nb] = x;
                 EcrireDir(fichier, i, buffer);
                 continuer = false;
             } else {
+                // Sinon, écrit le bloc, passe au bloc suivant, et réinitialise les indices
                 EcrireDir(fichier, i, buffer);
                 i = i + 1;
                 j = 1;
@@ -227,20 +236,19 @@ void inserer(typeEng e, TOV *fichier) {
             }
         }
 
+        // Si l'insertion se fait au-dela des blocs existants, cree un nouveau bloc
         if (i > ientete(fichier, 1)) {
-            buffer.tab[0] = e;
+            buffer.tab[1] = e;
             buffer.nb = 1;
             EcrireDir(fichier, i, buffer);
-            AffEntete(fichier, 1, i);
+            AffEntete(fichier, 1, i); // Mise a jour l'indice du dernier bloc
         }
 
+        // Mise a jour le nombre total d'enregistrements
         AffEntete(fichier, 2, ientete(fichier, 2) + 1);
-
     }
 }
 
-
-/**/
 
 
        //supression d un enregistrement de cle c
@@ -254,6 +262,7 @@ void inserer(typeEng e, TOV *fichier) {
      const char ph[20]= "physique" ;
      recherche_dicho(fichier,c,&trouv,&i,&j); //cherche a cle c
       if(trouv == true){
+        lireDir(fichier,i,buf);
         printf("vous voullez la supression physique ou logique? ");
         scanf("%s", type);//choisi si physique ou logique
         //strcmp pour compare 2 chaine de caractere type et lo ou ph si return 0 alors sont identique
@@ -268,7 +277,7 @@ void inserer(typeEng e, TOV *fichier) {
                     buf.tab[k]=buf.tab[k+1]; //decalage apartir d enrg qui veut suprimer
                 }
                 buf.nb-- ; //pour suprime derniere case
-             
+              EcrireDir(fichier,i,buf);
               }
       }
         AffEntete(fichier, 2, ientete(fichier, 2) - 1);
@@ -292,10 +301,10 @@ void inserer(typeEng e, TOV *fichier) {
     int taillePrenom = 0;
     entete mon_entete;
     int choix, choix1;
-    mon_entete.indice_der_bloc=4;
+   /* mon_entete.indice_der_bloc=4;
     mon_entete.totalblocs=5;
     mon_entete.totaleng=50;
-
+*/
 menuprincipal :
   printf("\n  LE MENU PRINCIPAL \n\n\n");
   printf(" [1] : creation d'un fichier;\n");
@@ -340,7 +349,7 @@ menuprincipal :
           printf("Combien d'enregistrements voulez-vous entrer ? : ");
           scanf("%d", &k);
           getchar();// consume newline
-          buf.nb=k;
+          buf.nb=1;
     for (int i = 0; i <= k; i++) {
         // Nom
         printf("Veuillez entrer un nom [appuyer Entrer pour terminer] : ");
@@ -405,7 +414,7 @@ menuprincipal :
          printf("Saisissez la cle a rechercher:\n");
          scanf("%d",&cle);
          recherche_dicho(fichier,cle,&trouv,&i,&j);
-        if(trouv==true){
+        if(trouv){
           printf("Resultat : La cle existe au bloc %d, position %d\n",i,j);
         }
        else{
