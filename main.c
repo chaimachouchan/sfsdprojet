@@ -297,6 +297,9 @@ void inserer(typeEng e, TOV *fichier) {
     int taillePrenom = 0;
     entete mon_entete;
     int choix, choix1;
+    mon_entete.indice_der_bloc=5;
+    mon_entete.totalblocs=5;
+    mon_entete.totaleng=50;
 
 menuprincipal :
   printf("\n  LE MENU PRINCIPAL \n\n\n");
@@ -342,8 +345,8 @@ menuprincipal :
           printf("Combien d'enregistrements voulez-vous entrer ? : ");
           scanf("%d", &k);
           getchar();// consume newline
-
-    for (int i = 1; i <= k; i++) {
+          buf.nb=k;
+    for (int i = 0; i <= k; i++) {
         // Nom
         printf("Veuillez entrer un nom [appuyer Entrer pour terminer] : ");
         while (1) {
@@ -401,6 +404,24 @@ menuprincipal :
 
           goto manipulation_fichier;
         }
+         case 2 : // recherche
+        {
+         printf(" \n RECHERCHE: \n ");
+         printf("Saisissez la cle a rechercher:\n");
+         scanf("%d",&cle);
+         recherche_dicho(fichier,cle,&trouv,&i,&j);
+        if(trouv==true){
+          printf("Resultat : La cle existe au bloc %d, position %d\n",i,j);
+        }
+       else{
+         printf("Resultat: La cle %d n'existe pas dans le fichier",cle);
+       }
+        printf("\n");
+
+          goto manipulation_fichier;
+
+
+        }
           case 3 : // suppression logique
         {
           printf("\n  SUPPRESSION:\n\n");
@@ -413,4 +434,4 @@ menuprincipal :
        }
     }
     end : return 0;
-    }
+    }}
